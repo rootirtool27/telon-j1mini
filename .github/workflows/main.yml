@@ -20,12 +20,19 @@ jobs:
       - name: Install Dependencies
         run: |
           cd telon-gateway-app
+          # Устанавливаем зависимости. Это создаст папку node_modules внутри telon-gateway-app
           npm install --legacy-peer-deps
+
+      - name: Check Files (Debug)
+        run: |
+          # Этот шаг просто покажет нам в логах, видит ли система файл native_modules.gradle
+          ls -l telon-gateway-app/node_modules/@react-native-community/cli-platform-android/native_modules.gradle || echo "FILE NOT FOUND!"
 
       - name: Build with Gradle
         run: |
+          # Заходим в папку android, которая является подпапкой telon-gateway-app
           cd telon-gateway-app/android
           chmod +x gradlew
-          # Флаг sdkDownload=true — наше главное спасение от ошибок с версиями SDK
+          # Запускаем сборку
           ./gradlew assembleDebug --no-daemon -Pandroid.builder.sdkDownload=true
           
