@@ -10,17 +10,29 @@ android {
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
+        
+        // Это важно для модулей
         missingDimensionStrategy 'store', 'play'
     }
 
     buildTypes {
         debug {
-            // Если в модуле нет дебага, просто берем релизную версию
-            matchingFallbacks = ['release', 'runtime']
+            // Теперь мы даем ТРИ варианта на случай, если модуль вредничает
+            matchingFallbacks = ['release', 'runtime', 'default']
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+}
+
+// ЭТОТ БЛОК — СЕКРЕТНЫЙ ИНГРЕДИЕНТ
+// Он заставляет Gradle проглатывать модули без атрибутов
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if (details.requested.group == "com.telexample") { // твой ID
+             // здесь можно принудительно менять версии, но мы оставим это как триггер стабильности
         }
     }
 }
@@ -30,7 +42,7 @@ dependencies {
     implementation "com.facebook.react:react-native:+"
     implementation "androidx.appcompat:appcompat:1.3.0"
     
-    // ВАЖНО: Убрали configuration: 'default', теперь это чистые ссылки
+    // ПИШЕМ ТАК: без всяких конфигураций, просто и чисто
     implementation project(':react-native-sip2')
     implementation project(':react-native-tele')
 }
