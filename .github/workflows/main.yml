@@ -16,13 +16,6 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      # ВОТ ЭТОТ НОВЫЙ ШАГ ПОЧИНИТ ОШИБКУ "android-31":
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          api-level: 31
-          build-tools: 30.0.3
-
       - name: Install Dependencies
         run: |
           cd telon-gateway-app
@@ -32,5 +25,8 @@ jobs:
         run: |
           cd telon-gateway-app/android
           chmod +x gradlew
+          # Принимаем лицензии Android напрямую через консоль
+          yes | sdkmanager --licenses || true
+          # Запускаем сборку
           ./gradlew assembleDebug --no-daemon
           
