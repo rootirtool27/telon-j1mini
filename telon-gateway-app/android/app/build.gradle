@@ -10,7 +10,6 @@ android {
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
-
         missingDimensionStrategy 'store', 'play'
     }
 
@@ -20,21 +19,15 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
-
-    packagingOptions {
-        pickFirst 'lib/x86/libc++_shared.so'
-        pickFirst 'lib/x86_64/libc++_shared.so'
-        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-        pickFirst 'lib/arm64-v8a/libc++_shared.so'
-    }
 }
 
 dependencies {
-    // ПОДКЛЮЧЕНИЕ НАПРЯМУЮ ИЗ ПАПОК (План Б)
-    implementation fileTree(dir: "../../node_modules/react-native/android", include: ["*.aar"])
-    implementation fileTree(dir: "../../node_modules/hermes-engine/android", include: ["*.aar"])
+    // Используем абсолютный путь через rootDir — это 100% сработает в GitHub Actions
+    def nodeModules = "${rootProject.projectDir}/../node_modules"
 
-    // Остальные стандартные библиотеки
+    implementation fileTree(dir: "${nodeModules}/react-native/android", include: ["**/*.aar"])
+    implementation fileTree(dir: "${nodeModules}/hermes-engine/android", include: ["**/*.aar"])
+
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
