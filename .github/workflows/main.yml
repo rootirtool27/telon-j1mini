@@ -18,22 +18,22 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          cache: 'gradle'
 
       - name: Install Node Modules
-        run: npm install --legacy-peer-deps
-        # Используем --legacy-peer-deps, чтобы старые либы не ругались на конфликты версий
+        # Мы заходим в папку проекта перед установкой
+        run: cd telon-gateway-app && npm install --legacy-peer-deps
 
       - name: Grant execute permission for gradlew
-        run: chmod +x android/gradlew
+        run: chmod +x telon-gateway-app/android/gradlew
 
       - name: Build with Gradle
+        # Переходим в android и запускаем сборку
         run: |
-          cd android
+          cd telon-gateway-app/android
           ./gradlew assembleDebug --stacktrace
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: telon-gateway-app/android/app/build/outputs/apk/debug/app-debug.apk
