@@ -1,8 +1,8 @@
 rootProject.name = 'telon-gateway-app'
 include ':app'
 
-// Путь до корня репозитория из папки android
-def nodeModulesPath = "../../node_modules"
+// Выходим из 'android' в 'telon-gateway-app', где лежат node_modules
+def nodeModulesPath = "../node_modules"
 def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
 
 if (nativeModulesFile.exists()) {
