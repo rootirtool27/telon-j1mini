@@ -10,36 +10,18 @@ android {
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
-        // Убираем лишние стратегии, оставляем базу
         missingDimensionStrategy 'store', 'play'
     }
 
     buildTypes {
         debug {
-            // Главный фикс: заставляем искать 'release' в модулях, если 'debug' пустой
+            // Если модуль не понимает, что такое debug, он просто возьмет release версию
             matchingFallbacks = ['release', 'runtime', 'default']
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
-    }
-
-    // Игнорируем ошибки сборки, чтобы прорваться к 4000 строкам
-    lintOptions {
-        checkReleaseBuilds false
-        abortOnError false
-    }
-}
-
-// СЕКРЕТНЫЙ СОУС: Исправляем ошибку "None of the consumable configurations have attributes"
-// Мы проходим по всем зависимостям и ПРИНУДИТЕЛЬНО ставим им тип 'debug'
-configurations.all {
-    resolutionStrategy {
-        force "com.facebook.react:react-native:+"
-    }
-    attributes {
-        attribute(Attribute.of('com.android.build.api.attributes.BuildTypeAttr', String), 'debug')
     }
 }
 
@@ -48,12 +30,11 @@ dependencies {
     implementation "com.facebook.react:react-native:+"
     implementation "androidx.appcompat:appcompat:1.3.0"
     
-    // Подключаем напрямую. Теперь благодаря блоку выше Gradle их "увидит"
+    // Подключаем напрямую — теперь корневой билд им поможет подружиться
     implementation project(':react-native-sip2')
     implementation project(':react-native-tele')
 }
 
-// Добиваем остатки node_modules
 def nodeModulesPath = "../node_modules"
 def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
 if (nativeModulesFile.exists()) {
