@@ -30,14 +30,10 @@ android {
 }
 
 dependencies {
-    // Определяем путь к папке node_modules
-    def nodeModules = "${rootProject.projectDir}/../node_modules"
+    // Теперь мы просто просим эти пакеты, а пути к ним Грейдл возьмет из внешнего файла
+    implementation "com.facebook.react:react-native:+" 
+    implementation "com.facebook.react:hermes-engine:+"
 
-    // Подключаем все .aar файлы из папок React Native и Hermes автоматически
-    implementation fileTree(dir: "${nodeModules}/react-native/android", include: ["*.aar"])
-    implementation fileTree(dir: "${nodeModules}/hermes-engine/android", include: ["*.aar"])
-
-    // Базовые библиотеки Android
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
