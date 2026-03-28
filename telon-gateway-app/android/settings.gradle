@@ -1,20 +1,17 @@
 rootProject.name = 'telexample'
 
-// Подключаем нативные модули вручную через абсолютные пути
 include ':react-native-sip2'
 project(':react-native-sip2').projectDir = new File(rootProject.projectDir, '../modules/react-native-sip2/android')
 
 include ':react-native-tele'
 project(':react-native-tele').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-tele/android/app')
 
-// Авто-линковка React Native (исправленная 6-я строка)
+// Исправленный блок авто-линковки
 def nativeModulesScript = new File(rootProject.projectDir, "../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
 
 if (nativeModulesScript.exists()) {
     apply from: nativeModulesScript
     applyNativeModulesSettingsGradle(settings)
-} else {
-    logger.warn("ПРЕДУПРЕЖДЕНИЕ: native_modules.gradle не найден по пути: ${nativeModulesScript.path}")
 }
 
 include ':app'
