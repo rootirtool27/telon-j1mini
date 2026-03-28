@@ -21,6 +21,8 @@ jobs:
         run: |
           cd telon-gateway-app
           npm install --legacy-peer-deps
+          echo "ПРОВЕРКА ФАЙЛОВ:"
+          ls -d node_modules/@react-native-community/cli-platform-android && echo "ПАПКА НАЙДЕНА" || echo "ПАПКА ОТСУТСТВУЕТ"
 
       - name: Build with Gradle
         run: |
