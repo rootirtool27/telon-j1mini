@@ -20,31 +20,6 @@ allprojects {
         google()
         mavenCentral()
         maven { url("$rootDir/../node_modules/react-native/android") }
-        maven { url("$rootDir/../node_modules/jsc-android/dist") }
         maven { url 'https://www.jitpack.io' }
-    }
-}
-
-// ВОТ ОН — ГЛАВНЫЙ ФИКС
-subprojects { project ->
-    afterEvaluate {
-        if (project.hasProperty("android")) {
-            android {
-                compileSdkVersion 31
-                buildToolsVersion "30.0.3"
-                
-                // Это создаст нужные "ручки", за которые схватится основной билд
-                buildTypes {
-                    debug {}
-                    release {}
-                }
-                
-                // Если есть флейворы (store/play), прописываем и их
-                flavorDimensions "store"
-                productFlavors {
-                    play { dimension "store" }
-                }
-            }
-        }
     }
 }
