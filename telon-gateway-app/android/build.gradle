@@ -12,7 +12,5 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        // Больше никаких локальных maven-путей здесь! 
-        // Это защищает от бесконечного цикла (StackOverflow).
     }
 }
