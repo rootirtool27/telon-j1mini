@@ -19,7 +19,6 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      # ПРИНУДИТЕЛЬНАЯ УСТАНОВКА GRADLE 7.0.2
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
         with:
@@ -32,12 +31,13 @@ jobs:
         run: chmod +x telon-gateway-app/android/gradlew
 
       - name: Build with Gradle
-        # Мы запускаем сборку напрямую через установленный gradle, а не через ./gradlew
+        # Добавили --no-daemon и --stacktrace для стабильности
         run: |
           cd telon-gateway-app/android
-          gradle assembleDebug --stacktrace
+          gradle assembleDebug --no-daemon --stacktrace
           
       - name: Upload APK
+        if: success() # Загружать только если сборка прошла успешно
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
