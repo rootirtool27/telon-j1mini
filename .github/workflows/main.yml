@@ -18,9 +18,10 @@ jobs:
 
       - name: Install Android SDK 31
         run: |
-          # Принимаем лицензии и принудительно ставим платформу 31
-          yes | sdkmanager --licenses > /dev/null
-          sdkmanager "platforms;android-31" "build-tools;30.0.3"
+          # Принудительно находим sdkmanager через переменную окружения
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-31" "build-tools;30.0.3"
 
       - name: Install Dependencies
         run: |
