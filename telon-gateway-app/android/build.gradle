@@ -4,24 +4,24 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Стабильная версия для Gradle 7.5.1
         classpath("com.android.tools.build:gradle:7.4.2")
     }
 }
 
+// ВОТ ЭТОТ БЛОК ЗАМЕНЯЕМ ПОЛНОСТЬЮ
 allprojects {
     repositories {
         google()
         mavenCentral()
 
-        // ВАЖНО: Указываем путь к папке android внутри node_modules
+        // Прямой путь к папке android внутри node_modules
         maven {
-            url "$rootDir/../node_modules/react-native/android"
+            url file("${projectDir}/../../node_modules/react-native/android")
         }
 
         // Путь для Android-движка Hermes
         maven {
-            url "$rootDir/../node_modules/hermes-engine/android"
+            url file("${projectDir}/../../node_modules/hermes-engine/android")
         }
 
         maven { url "https://jitpack.io" }
