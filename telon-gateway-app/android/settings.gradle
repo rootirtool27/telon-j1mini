@@ -1,7 +1,7 @@
 rootProject.name = 'telon-gateway-app'
+
 include ':app'
 
-// ВСЁ. Больше ничего не инклудим вручную. 
-// Пусть React Native сам разбирается через свой скрипт.
+// Для settings.gradle путь '../', так как файл лежит прямо в 'android/'
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); 
 applyNativeModulesSettingsGradle(settings)
