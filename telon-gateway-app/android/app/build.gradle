@@ -15,8 +15,7 @@ android {
 
     buildTypes {
         debug {
-            // Если модуль не отдает дебаг-версию, мы принудительно берем то, что есть
-            matchingFallbacks = ['release', 'runtime', 'default']
+            matchingFallbacks = ['release']
         }
         release {
             minifyEnabled false
@@ -25,21 +24,26 @@ android {
     }
 }
 
-// Этот блок принудительно «лечит» зависимости перед сборкой
-configurations.all {
-    resolutionStrategy.eachDependency { details ->
-        // Здесь можно форсировать версии библиотек, если полетят 4000 строк ошибок
-    }
-}
-
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"
     implementation "androidx.appcompat:appcompat:1.3.0"
     
-    // Прямое подключение без лишних условий
-    implementation project(':react-native-sip2')
-    implementation project(':react-native-tele')
+    // Подключаем через 'default', игнорируя Android-атрибуты
+    implementation project(path: ':react-native-sip2', configuration: 'default')
+    implementation project(path: ':react-native-tele', configuration: 'default')
+}
+
+// ЭТОТ БЛОК ДОЛЖЕН РАЗОРВАТЬ ЦИКЛ ОШИБОК
+// Проходимся по всем зависимым проектам и заставляем их иметь хоть какие-то атрибуты
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            project.android {
+                publishNonDefault true
+            }
+        }
+    }
 }
 
 def nodeModulesPath = "../node_modules"
