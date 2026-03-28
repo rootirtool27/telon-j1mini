@@ -12,6 +12,15 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        
+        // Магия: превращаем папку node_modules в настоящий репозиторий
+        maven {
+            url "${rootProject.projectDir}/../node_modules/react-native/android"
+        }
+        maven {
+            url "${rootProject.projectDir}/../node_modules/hermes-engine/android"
+        }
+        
         maven { url "https://jitpack.io" }
     }
 }
