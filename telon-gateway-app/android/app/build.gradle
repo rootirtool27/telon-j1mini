@@ -29,13 +29,10 @@ android {
 }
 
 dependencies {
-    // Прямое подключение всех библиотек из папок node_modules
-    implementation fileTree(dir: "../../node_modules/react-native/android", include: ["*.aar"])
-    implementation fileTree(dir: "../../node_modules/hermes-engine/android", include: ["*.aar"])
+    // Используем динамический поиск внутри локальных папок
+    implementation "com.facebook.react:react-native:+"
+    implementation "com.facebook.react:hermes-engine:+"
 
-    // Обязательные зависимости для работы React Native
-    implementation "com.facebook.infer.annotation:infer-annotation:0.18.0"
-    implementation "javax.inject:javax.inject:1"
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
