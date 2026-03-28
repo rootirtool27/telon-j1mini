@@ -1,9 +1,10 @@
 apply plugin: "com.android.application"
 
 android {
+    // Должно совпадать с тем, что мы писали в Манифесте
     namespace "one.telefon.gateway" 
     compileSdkVersion 34
-    
+
     defaultConfig {
         applicationId "one.telefon.gateway"
         minSdkVersion 21
@@ -11,6 +12,7 @@ android {
         versionCode 1
         versionName "1.0"
 
+        // Нужно для работы твоих модулей SIP и Tele
         missingDimensionStrategy 'store', 'play'
     }
 
@@ -30,16 +32,15 @@ android {
 }
 
 dependencies {
-    // Теперь подключаем версию 0.80.0 официально через Maven-путь выше
-    implementation "com.facebook.react:react-native:0.80.0"
-    implementation "com.facebook.react:hermes-android"
+    // ВАЖНО: Мы пишем "+", чтобы Gradle сам взял ту версию, 
+    // которую найдет в node_modules по путям из внешнего файла
+    implementation "com.facebook.react:react-native:+"
+    implementation "com.facebook.react:hermes-android:+"
 
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 }
 
-// Фикс для предотвращения StackOverflow и конфликтов версий
-configurations.all {
-    resolutionStrategy.force 'com.facebook.react:react-native:0.80.0'
-}
+// ВНИМАНИЕ: Если здесь внизу был блок configurations.all { ... }, 
+// мы его УДАЛИЛИ, чтобы не было ошибки StackOverflow.
