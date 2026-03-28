@@ -1,8 +1,8 @@
 buildscript {
     ext {
         buildToolsVersion = "30.0.3"
-        minSdkVersion = 21        // Android 5.1 (Lollipop)
-        compileSdkVersion = 31    // Android 12 (стабильно для Gradle 7)
+        minSdkVersion = 21        // Твоя цель — Android 5.1
+        compileSdkVersion = 31    // Совместимо с Gradle 7.0
         targetSdkVersion = 31
         ndkVersion = "21.4.7075529"
     }
@@ -11,7 +11,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Плагин версии 7.0.4 строго под Gradle 7.0
+        // Обязательно эта версия для Gradle 7.0
         classpath("com.android.tools.build:gradle:7.0.4")
     }
 }
@@ -21,8 +21,4 @@ allprojects {
         google()
         mavenCentral()
     }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }
