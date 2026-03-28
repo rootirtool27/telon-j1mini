@@ -1,19 +1,5 @@
 rootProject.name = 'telon-gateway-app'
 include ':app'
 
-// Умный поиск файла native_modules.gradle
-def nodeModulesPath = "../node_modules"
-def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
-
-// Если в первом месте нет, пробуем искать прямо в папке react-native (для новых версий)
-if (!nativeModulesFile.exists()) {
-    nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/react-native/gradle/native_modules.gradle")
-}
-
-if (nativeModulesFile.exists()) {
-    apply from: nativeModulesFile
-    applyNativeModulesSettingsGradle(settings)
-} else {
-    // Не падаем, а просто пишем в лог, чтобы увидеть структуру папок
-    println "⚠️ ПРЕДУПРЕЖДЕНИЕ: native_modules.gradle не найден. Билд может идти без авто-модулей."
-}
+// В 0.80.0 авто-подключение часто ломает старые билды, 
+// пока просто дадим проекту запуститься
