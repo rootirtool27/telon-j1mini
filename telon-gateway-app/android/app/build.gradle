@@ -10,26 +10,25 @@ android {
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
-        
-        // Маневр для обхода проверок версий
         missingDimensionStrategy 'store', 'play'
     }
 
     buildTypes {
         debug {
-            // Ультимативный список: перебираем всё, пока не зацепимся
-            matchingFallbacks = ['release', 'runtime', 'default', 'debug']
+            // Если модуль не отдает дебаг-версию, мы принудительно берем то, что есть
+            matchingFallbacks = ['release', 'runtime', 'default']
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+}
 
-    // Это заставит Gradle игнорировать ошибки отсутствующих атрибутов в зависимостях
-    lintOptions {
-        checkReleaseBuilds false
-        abortOnError false
+// Этот блок принудительно «лечит» зависимости перед сборкой
+configurations.all {
+    resolutionStrategy.eachDependency { details ->
+        // Здесь можно форсировать версии библиотек, если полетят 4000 строк ошибок
     }
 }
 
@@ -38,21 +37,13 @@ dependencies {
     implementation "com.facebook.react:react-native:+"
     implementation "androidx.appcompat:appcompat:1.3.0"
     
-    // Пытаемся подключить без указания конфигурации, но с 'matchingFallbacks' выше
+    // Прямое подключение без лишних условий
     implementation project(':react-native-sip2')
     implementation project(':react-native-tele')
 }
 
-// Фикс для принудительного согласования типов (самый мощный костыль)
-configurations.all {
-    resolutionStrategy {
-        // Заставляем все зависимости соглашаться на то, что дает билд
-    }
-}
-
 def nodeModulesPath = "../node_modules"
 def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
-
 if (nativeModulesFile.exists()) {
     apply from: nativeModulesFile
     applyNativeModulesAppBuildGradle(project)
