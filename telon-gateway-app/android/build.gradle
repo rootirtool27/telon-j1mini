@@ -12,15 +12,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        
-        // Магия здесь: указываем Грейдлу искать библиотеки прямо в node_modules
-        maven {
-            url "$rootDir/../node_modules/react-native/android"
-        }
-        maven {
-            url "$rootDir/../node_modules/hermes-engine/android"
-        }
-        
         maven { url "https://jitpack.io" }
     }
 }
