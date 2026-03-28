@@ -1,4 +1,4 @@
-name: Build Android
+name: Build Android APK
 
 on:
   workflow_dispatch:
@@ -6,10 +6,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Указываем, что все команды выполняются в папке с Android-проектом
+    # Заходим в папку, где лежит сам проект и папка android
     defaults:
       run:
-        working-directory: android
+        working-directory: telon-gateway-app/android
 
     steps:
       - name: Checkout code
@@ -21,10 +21,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Cache Gradle packages
+      - name: Cache Gradle
         uses: actions/cache@v4
         with:
-          path: ~/.gradle/caches
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
@@ -32,5 +34,5 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
+      - name: Build Release APK
         run: ./gradlew assembleRelease
