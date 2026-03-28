@@ -1,5 +1,4 @@
 name: Build Android APK
-
 on:
   push:
     branches: [ master, main ]
@@ -8,37 +7,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'temurin'
-
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-version: 7.0.2
-
-      - name: Install Node Modules
-        run: cd telon-gateway-app && npm install --legacy-peer-deps
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x telon-gateway-app/android/gradlew
-
-      - name: Build with Gradle
-        # Добавили --no-daemon и --stacktrace для стабильности
+      - name: Install
+        run: |
+          cd telon-gateway-app
+          npm install --legacy-peer-deps
+      - name: Build
         run: |
           cd telon-gateway-app/android
-          gradle assembleDebug --no-daemon --stacktrace
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
           
-      - name: Upload APK
-        if: success() # Загружать только если сборка прошла успешно
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug
-          path: telon-gateway-app/android/app/build/outputs/apk/debug/app-debug.apk
