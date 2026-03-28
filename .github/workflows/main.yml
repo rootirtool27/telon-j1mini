@@ -1,14 +1,11 @@
 name: Build Android APK
-
 on:
   push:
     branches: [ master, main ]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,6 +15,13 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
+
+      # ВОТ ЭТОТ НОВЫЙ ШАГ ПОЧИНИТ ОШИБКУ "android-31":
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 31
+          build-tools: 30.0.3
 
       - name: Install Dependencies
         run: |
