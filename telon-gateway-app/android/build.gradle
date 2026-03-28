@@ -4,7 +4,6 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Версия 7.4.2 отлично работает с Gradle 7.5.1
         classpath("com.android.tools.build:gradle:7.4.2")
     }
 }
@@ -13,12 +12,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        
-        // Поиск локальных модулей
-        maven {
-            url "$rootDir/../node_modules/react-native/android"
-        }
-        
-        maven { url 'https://www.jitpack.io' }
+        maven { url "$rootDir/../node_modules/react-native/android" }
+        maven { url "https://jitpack.io" }
     }
 }
