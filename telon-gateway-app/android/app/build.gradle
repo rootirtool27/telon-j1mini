@@ -28,10 +28,11 @@ android {
     }
 }
 
+
 dependencies {
-    // Прямое подключение запчастей из папок проекта
-    implementation fileTree(dir: "../../node_modules/react-native/android", include: ["*.aar"])
-    implementation fileTree(dir: "../../node_modules/hermes-engine/android", include: ["*.aar"])
+    // Явно указываем версию, которую видели в твоих прошлых логах
+    implementation "com.facebook.react:react-native:0.71.0-rc.0"
+    implementation "com.facebook.react:hermes-android:0.71.0-rc.0"
 
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
