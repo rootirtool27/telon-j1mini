@@ -1,17 +1,12 @@
-rootProject.name = 'telexample'
-
-include ':react-native-sip2'
-project(':react-native-sip2').projectDir = new File(rootProject.projectDir, '../modules/react-native-sip2/android')
-
-include ':react-native-tele'
-project(':react-native-tele').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-tele/android/app')
-
-// Исправленный блок авто-линковки
-def nativeModulesScript = new File(rootProject.projectDir, "../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
-
-if (nativeModulesScript.exists()) {
-    apply from: nativeModulesScript
-    applyNativeModulesSettingsGradle(settings)
-}
+rootProject.name = 'TelonGateway'
 
 include ':app'
+
+// Указываем правильный путь к библиотекам внутри node_modules
+include ':react-native-sip2'
+project(':react-native-sip2').projectDir = new File(rootProject.projectDir, '../../node_modules/react-native-sip2/android')
+
+include ':react-native-tele'
+project(':react-native-tele').projectDir = new File(rootProject.projectDir, '../../node_modules/react-native-tele/android')
+
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(project)
