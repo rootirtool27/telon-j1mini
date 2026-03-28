@@ -1,24 +1,24 @@
 buildscript {
-    ext {
-        buildToolsVersion = "30.0.3"
-        minSdkVersion = 21
-        compileSdkVersion = 31
-        targetSdkVersion = 31
-        androidGradlePluginVersion = "4.2.2"
-    }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:${androidGradlePluginVersion}")
+        classpath("com.android.tools.build:gradle:7.0.2")
     }
 }
 
 allprojects {
     repositories {
-        google()
         mavenCentral()
-        maven { url("$rootDir/../node_modules/react-native/android") }
+        google()
+        
+        // ВОТ ЭТО СПАСЕТ БИЛД:
+        maven {
+            // Указываем прямой путь к папке с андроидной частью react-native
+            url("$rootDir/../node_modules/react-native/android")
+        }
+        
+        maven { url 'https://www.jitpack.io' }
     }
 }
