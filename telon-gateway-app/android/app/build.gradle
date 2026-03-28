@@ -29,10 +29,14 @@ android {
 }
 
 dependencies {
-    // Используем динамический поиск внутри локальных папок
-    implementation "com.facebook.react:react-native:+"
-    implementation "com.facebook.react:hermes-engine:+"
+    // ХВАТИТ ИСКАТЬ, ПРОСТО ВОЗЬМИ ФАЙЛЫ:
+    implementation fileTree(dir: "../../node_modules/react-native/android", include: ["*.aar"])
+    implementation fileTree(dir: "../../node_modules/hermes-engine/android", include: ["*.aar"])
 
+    // Добираем то, чего не хватает в архивах:
+    implementation "com.facebook.infer.annotation:infer-annotation:0.18.0"
+    implementation "javax.inject:javax.inject:1"
+    
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
