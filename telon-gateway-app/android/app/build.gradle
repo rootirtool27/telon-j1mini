@@ -33,8 +33,8 @@ dependencies {
     implementation "androidx.appcompat:appcompat:1.3.0"
 }
 
-// Путь до корня из папки app
-def nodeModulesPath = "../../../node_modules"
+// Выход из 'app' и 'android' в корень 'telon-gateway-app'
+def nodeModulesPath = "../../node_modules"
 def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
 
 if (nativeModulesFile.exists()) {
