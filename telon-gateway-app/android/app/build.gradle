@@ -15,12 +15,10 @@ android {
 
     buildTypes {
         debug {
-            // Если модуль не понимает, что такое debug, он просто возьмет release версию
-            matchingFallbacks = ['release', 'runtime', 'default']
+            matchingFallbacks = ['release']
         }
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
 }
@@ -30,14 +28,6 @@ dependencies {
     implementation "com.facebook.react:react-native:+"
     implementation "androidx.appcompat:appcompat:1.3.0"
     
-    // Подключаем напрямую — теперь корневой билд им поможет подружиться
     implementation project(':react-native-sip2')
     implementation project(':react-native-tele')
-}
-
-def nodeModulesPath = "../node_modules"
-def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
-if (nativeModulesFile.exists()) {
-    apply from: nativeModulesFile
-    applyNativeModulesAppBuildGradle(project)
 }
