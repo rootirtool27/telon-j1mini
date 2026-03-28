@@ -12,6 +12,15 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        
+        // Это самый надежный способ: он сам найдет путь к папке node_modules
+        maven {
+            url("$rootDir/../node_modules/react-native/android")
+        }
+        maven {
+            url("$rootDir/../node_modules/hermes-engine/android")
+        }
+        
         maven { url "https://jitpack.io" }
     }
 }
