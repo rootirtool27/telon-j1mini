@@ -1,22 +1,17 @@
-// Топ-левел билд-файл, где мы настраиваем плагины для всего проекта
 buildscript {
     ext {
         buildToolsVersion = "30.0.3"
         minSdkVersion = 21
         compileSdkVersion = 31
         targetSdkVersion = 31
-        // Версия Gradle-плагина, которая дружит с RN 0.60-0.70
         androidGradlePluginVersion = "4.2.2"
     }
     repositories {
         google()
         mavenCentral()
-        jcenter() // Для очень старых библиотек, если они есть
     }
     dependencies {
         classpath("com.android.tools.build:gradle:${androidGradlePluginVersion}")
-        // Добавляем поддержку Kotlin, если она понадобится модулям
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31"
     }
 }
 
@@ -24,31 +19,19 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven {
-            // Android SDK внутри node_modules
-            url("$rootDir/../node_modules/react-native/android")
-        }
-        maven {
-            // Локальные библиотеки
-            url("$rootDir/../node_modules/jsc-android/dist")
-        }
+        maven { url("$rootDir/../node_modules/react-native/android") }
+        maven { url("$rootDir/../node_modules/jsc-android/dist") }
         maven { url 'https://www.jitpack.io' }
     }
 }
 
-// ЭТО КЛЮЧЕВОЙ МОМЕНТ: заставляем ВСЕ подпроекты (tele, sip2) 
-// правильно отдавать свои конфигурации основному приложению
+// Помогаем подпроектам осознать себя
 subprojects {
     afterEvaluate { project ->
         if (project.hasProperty("android")) {
             project.android {
-                // Разрешаем публикацию всех вариантов (debug/release)
-                publishNonDefault true
-                
-                // Исправляем потенциальный конфликт версий внутри модулей
                 compileSdkVersion 31
                 buildToolsVersion "30.0.3"
-                
                 defaultConfig {
                     minSdkVersion 21
                     targetSdkVersion 31
