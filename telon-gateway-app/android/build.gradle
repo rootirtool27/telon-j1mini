@@ -13,7 +13,7 @@ allprojects {
         google()
         mavenCentral()
         
-        // Это заставит Gradle искать файлы прямо в папках
+        // Указываем пути к папкам, где лежат библиотеки
         flatDir {
             dirs "${rootProject.projectDir}/../node_modules/react-native/android"
             dirs "${rootProject.projectDir}/../node_modules/hermes-engine/android"
