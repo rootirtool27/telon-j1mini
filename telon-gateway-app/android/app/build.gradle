@@ -1,43 +1,35 @@
 apply plugin: "com.android.application"
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 34 // Для версии 0.80 лучше поднять до 34
+    buildToolsVersion "34.0.0"
 
     defaultConfig {
         applicationId "com.telexample"
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
         missingDimensionStrategy 'store', 'play'
     }
 
     buildTypes {
-        debug {
-            matchingFallbacks = ['release']
+        release {
+            minifyEnabled false
         }
-    }
-
-    packagingOptions {
-        pickFirst 'lib/x86/libc++_shared.so'
-        pickFirst 'lib/x86_64/libc++_shared.so'
-        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-        pickFirst 'lib/arm64-v8a/libc++_shared.so'
     }
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "com.facebook.react:react-native:+"
-    implementation "androidx.appcompat:appcompat:1.3.0"
+    
+    // ЯВНО УКАЗЫВАЕМ ТВОЮ ВЕРСИЮ ИЗ package.json
+    implementation "com.facebook.react:react-native:0.80.0"
+    
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "com.facebook.react:hermes-android" // В 0.80 это стандарт
 }
 
-// Выход из 'app' и 'android' в корень 'telon-gateway-app'
-def nodeModulesPath = "../../node_modules"
-def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
-
-if (nativeModulesFile.exists()) {
-    apply from: nativeModulesFile
-    applyNativeModulesAppBuildGradle(project)
-}
+// Авто-подключение модулей
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); 
+applyNativeModulesAppBuildGradle(project)
