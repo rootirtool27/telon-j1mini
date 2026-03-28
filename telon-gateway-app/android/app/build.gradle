@@ -11,27 +11,14 @@ android {
         versionCode 1
         versionName "1.0"
         
-        // Эта стратегия заставит Gradle не искать 'debug' в модулях, где его нет
+        // Помогает модулям разобраться с версиями
         missingDimensionStrategy 'store', 'play'
-    }
-
-    // НОВЫЙ БЛОК: Решаем проблему "No matching configuration" на корню
-    configurations.all {
-        resolutionStrategy {
-            dependencySubstitution {
-                // Если Gradle тупит с типами сборок, это должно его успокоить
-            }
-        }
-        attributes {
-            // Удаляем требование конкретного типа сборки для зависимостей
-            attribute(Attribute.of('com.android.build.api.attributes.BuildTypeAttr', String), 'debug')
-        }
     }
 
     buildTypes {
         debug {
-            // Подстраховка: если нет дебага, бери релиз
-            matchingFallbacks = ['release', 'default']
+            // Если в модуле нет дебага, берем релизную сборку
+            matchingFallbacks = ['release']
         }
         release {
             minifyEnabled false
@@ -45,11 +32,12 @@ dependencies {
     implementation "com.facebook.react:react-native:+"
     implementation "androidx.appcompat:appcompat:1.3.0"
     
-    // Подключаем модули, используя базовую конфигурацию 'default'
+    // Подключаем модули, принудительно указывая конфигурацию по умолчанию
     implementation project(path: ':react-native-sip2', configuration: 'default')
     implementation project(path: ':react-native-tele', configuration: 'default')
 }
 
+// Авто-подключение остальных модулей
 def nodeModulesPath = "../node_modules"
 def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
 
