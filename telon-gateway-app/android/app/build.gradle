@@ -33,18 +33,19 @@ dependencies {
     implementation "androidx.appcompat:appcompat:1.3.0"
     implementation "com.google.android.material:material:1.4.0"
     
-    // Твои модули
+    // Подключаем модули (имена из settings.gradle)
     implementation project(':react-native-sip2')
     implementation project(':react-native-tele')
 }
 
-// БЕЗОПАСНОЕ ПОДКЛЮЧЕНИЕ СКРИПТОВ REACT NATIVE
-def reactGradle = new File(rootProject.projectDir, "../../node_modules/react-native/react.gradle")
+// Безопасное подключение скриптов (не упадет, если файла нет)
+def nodeModules = "../../node_modules"
+def reactGradle = new File(rootProject.projectDir, "${nodeModules}/react-native/react.gradle")
 if (reactGradle.exists()) {
     apply from: reactGradle
 }
 
-def nativeModulesFile = new File(rootProject.projectDir, "../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+def nativeModulesFile = new File(rootProject.projectDir, "${nodeModules}/@react-native-community/cli-platform-android/native_modules.gradle")
 if (nativeModulesFile.exists()) {
     apply from: nativeModulesFile
     applyNativeModulesAppBuildGradle(project)
