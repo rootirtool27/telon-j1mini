@@ -1,19 +1,32 @@
-rootProject.name = 'TelonGateway'
+name: Build Android APK
 
-include ':app'
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
 
-// Автоматически находим папку node_modules рядом с папкой android
-def nodeModulesDir = new File(rootProject.projectDir, '../node_modules')
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-include ':react-native-sip2'
-project(':react-native-sip2').projectDir = new File(nodeModulesDir, 'react-native-sip2/android')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-include ':react-native-tele'
-project(':react-native-tele').projectDir = new File(nodeModulesDir, 'react-native-tele/android')
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
 
-// Применяем скрипт из найденной папки
-def nativeModulesScript = new File(nodeModulesDir, '@react-native-community/cli-platform-android/native_modules.gradle')
-if (nativeModulesScript.exists()) {
-    apply from: nativeModulesScript
-    applyNativeModulesSettingsGradle(project)
-}
+      - name: Install Dependencies
+        run: |
+          cd telon-gateway-app
+          npm install --legacy-peer-deps
+
+      - name: Build with Gradle
+        run: |
+          cd telon-gateway-app/android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          
