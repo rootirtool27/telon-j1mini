@@ -10,12 +10,19 @@ android {
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
+        
+        // Помогает модулям найти общие атрибуты
         missingDimensionStrategy 'store', 'play'
     }
 
     buildTypes {
         debug {
+            // Если в модулях нет дебага, берем релиз
             matchingFallbacks = ['release']
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
 }
@@ -25,10 +32,15 @@ dependencies {
     implementation "com.facebook.react:react-native:+"
     implementation "androidx.appcompat:appcompat:1.3.0"
     
-    // ПУСТОТА. Никаких manual проектов. 
-    // Даем шанс автоматике React Native.
+    // ВАЖНО: Мы не пишем здесь ссылки на :react-native-tele вручную!
+    // Их подтянет скрипт ниже автоматически.
 }
 
-// ЭТОТ БЛОК — НАШ ПОСЛЕДНИЙ ШАНС
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); 
-applyNativeModulesAppBuildGradle(project)
+// Выход из 'android/app' в корень через '../..' чтобы найти node_modules
+def nodeModulesPath = "../../node_modules"
+def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
+
+if (nativeModulesFile.exists()) {
+    apply from: nativeModulesFile
+    applyNativeModulesAppBuildGradle(project)
+}
