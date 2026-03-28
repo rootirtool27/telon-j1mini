@@ -1,9 +1,9 @@
 apply plugin: "com.android.application"
 
 android {
-    compileSdkVersion 34 // Для версии 0.80 лучше поднять до 34
-    buildToolsVersion "34.0.0"
-
+    namespace "com.telexample" // Добавили обязательный namespace для Gradle 7.5+
+    compileSdkVersion 34
+    
     defaultConfig {
         applicationId "com.telexample"
         minSdkVersion 21
@@ -21,15 +21,19 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
-    
-    // ЯВНО УКАЗЫВАЕМ ТВОЮ ВЕРСИЮ ИЗ package.json
     implementation "com.facebook.react:react-native:0.80.0"
-    
-    implementation "androidx.appcompat:appcompat:1.6.1"
-    implementation "com.facebook.react:hermes-android" // В 0.80 это стандарт
+    implementation "com.facebook.react:hermes-android"
 }
 
-// Авто-подключение модулей
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); 
-applyNativeModulesAppBuildGradle(project)
+// Умный поиск для app/build.gradle
+def nodeModulesPath = "../../node_modules"
+def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
+
+if (!nativeModulesFile.exists()) {
+    nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/react-native/gradle/native_modules.gradle")
+}
+
+if (nativeModulesFile.exists()) {
+    apply from: nativeModulesFile
+    applyNativeModulesAppBuildGradle(project)
+}
