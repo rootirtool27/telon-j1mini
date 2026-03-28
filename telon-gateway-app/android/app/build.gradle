@@ -12,14 +12,6 @@ android {
         versionName "1.0"
     }
 
-    // Указываем, где лежат библиотеки, ОДИН РАЗ
-    repositories {
-        flatDir {
-            dirs "../../node_modules/react-native/android", 
-                 "../../node_modules/hermes-engine/android"
-        }
-    }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -29,14 +21,19 @@ android {
 }
 
 dependencies {
-    // Подключаем библиотеки по именам (как они лежат в папках)
-    implementation name: 'react-native-0.71.0-rc.0', ext: 'aar'
-    implementation name: 'hermes-engine-0.71.0-rc.0', ext: 'aar'
+    // 1. Подключаем ВСЁ из папок, не называя имен файлов (так мы не ошибемся в версии)
+    implementation fileTree(dir: "../../node_modules/react-native/android", include: ["**/*.aar"])
+    implementation fileTree(dir: "../../node_modules/hermes-engine/android", include: ["**/*.aar"])
 
-    // Необходимые "мозги" для библиотек
+    // 2. Жизненно важные органы React Native
     implementation "com.facebook.infer.annotation:infer-annotation:0.18.0"
     implementation "javax.inject:javax.inject:1"
     implementation "com.facebook.soloader:soloader:0.10.5"
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    
+    // 3. Добавляем OkHttp (React Native без него не живет)
+    implementation "com.squareup.okhttp3:okhttp:4.9.2"
+    implementation "com.squareup.okhttp3:okhttp-urlconnection:4.9.2"
+    implementation "com.squareup.okio:okio:2.9.0"
 }
