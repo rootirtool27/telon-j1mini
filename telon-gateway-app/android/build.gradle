@@ -25,16 +25,24 @@ allprojects {
     }
 }
 
-// Помогаем подпроектам осознать себя
-subprojects {
-    afterEvaluate { project ->
+// ВОТ ОН — ГЛАВНЫЙ ФИКС
+subprojects { project ->
+    afterEvaluate {
         if (project.hasProperty("android")) {
-            project.android {
+            android {
                 compileSdkVersion 31
                 buildToolsVersion "30.0.3"
-                defaultConfig {
-                    minSdkVersion 21
-                    targetSdkVersion 31
+                
+                // Это создаст нужные "ручки", за которые схватится основной билд
+                buildTypes {
+                    debug {}
+                    release {}
+                }
+                
+                // Если есть флейворы (store/play), прописываем и их
+                flavorDimensions "store"
+                productFlavors {
+                    play { dimension "store" }
                 }
             }
         }
