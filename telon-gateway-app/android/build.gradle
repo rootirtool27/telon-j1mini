@@ -12,7 +12,13 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        // Оставляем только Джитпак, остальное Грейдл найдет сам в папках
+        
+        // Это заставит Gradle искать файлы прямо в папках
+        flatDir {
+            dirs "${rootProject.projectDir}/../node_modules/react-native/android"
+            dirs "${rootProject.projectDir}/../node_modules/hermes-engine/android"
+        }
+        
         maven { url "https://jitpack.io" }
     }
 }
