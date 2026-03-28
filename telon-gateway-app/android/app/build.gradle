@@ -13,6 +13,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // ВОТ ЭТА СТРОЧКА ИСПРАВИТ ОШИБКУ:
+            matchingFallbacks = ['release']
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
@@ -33,19 +37,19 @@ dependencies {
     implementation "androidx.appcompat:appcompat:1.3.0"
     implementation "com.google.android.material:material:1.4.0"
     
-    // Подключаем модули (имена из settings.gradle)
+    // Подключаем модули
     implementation project(':react-native-sip2')
     implementation project(':react-native-tele')
 }
 
-// Безопасное подключение скриптов (не упадет, если файла нет)
-def nodeModules = "../../node_modules"
-def reactGradle = new File(rootProject.projectDir, "${nodeModules}/react-native/react.gradle")
+// Поиск скриптов React Native
+def nodeModulesPath = "../../node_modules"
+def reactGradle = new File(rootProject.projectDir, "${nodeModulesPath}/react-native/react.gradle")
 if (reactGradle.exists()) {
     apply from: reactGradle
 }
 
-def nativeModulesFile = new File(rootProject.projectDir, "${nodeModules}/@react-native-community/cli-platform-android/native_modules.gradle")
+def nativeModulesFile = new File(rootProject.projectDir, "${nodeModulesPath}/@react-native-community/cli-platform-android/native_modules.gradle")
 if (nativeModulesFile.exists()) {
     apply from: nativeModulesFile
     applyNativeModulesAppBuildGradle(project)
