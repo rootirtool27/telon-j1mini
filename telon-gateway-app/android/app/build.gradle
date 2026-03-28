@@ -13,6 +13,14 @@ android {
         missingDimensionStrategy 'store', 'play'
     }
 
+    // Это "черный ход" для компилятора Java
+    repositories {
+        flatDir {
+            dirs "../../node_modules/react-native/android", 
+                 "../../node_modules/hermes-engine/android"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -29,15 +37,15 @@ android {
 }
 
 dependencies {
-    // ХВАТИТ ИСКАТЬ, ПРОСТО ВОЗЬМИ ФАЙЛЫ:
+    // 1. Подключаем сами файлы .aar напрямую из папок
     implementation fileTree(dir: "../../node_modules/react-native/android", include: ["*.aar"])
     implementation fileTree(dir: "../../node_modules/hermes-engine/android", include: ["*.aar"])
 
-    // Добираем то, чего не хватает в архивах:
+    // 2. Вручную добавляем то, что обычно тянется "автоматом"
+    // Без этих строк будет ошибка "package com.facebook.react does not exist"
     implementation "com.facebook.infer.annotation:infer-annotation:0.18.0"
     implementation "javax.inject:javax.inject:1"
-    
-    implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
+    implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 }
