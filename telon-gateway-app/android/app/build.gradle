@@ -28,12 +28,14 @@ android {
     }
 }
 
-
 dependencies {
-    // Явно указываем версию, которую видели в твоих прошлых логах
-    implementation "com.facebook.react:react-native:0.71.0-rc.0"
-    implementation "com.facebook.react:hermes-android:0.71.0-rc.0"
+    // Прямое подключение всех библиотек из папок node_modules
+    implementation fileTree(dir: "../../node_modules/react-native/android", include: ["*.aar"])
+    implementation fileTree(dir: "../../node_modules/hermes-engine/android", include: ["*.aar"])
 
+    // Обязательные зависимости для работы React Native
+    implementation "com.facebook.infer.annotation:infer-annotation:0.18.0"
+    implementation "javax.inject:javax.inject:1"
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
