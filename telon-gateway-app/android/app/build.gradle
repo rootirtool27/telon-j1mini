@@ -1,21 +1,48 @@
 apply plugin: "com.android.application"
 
 android {
-    namespace "com.telexample"
-    compileSdkVersion 34
+    // Этот namespace должен строго совпадать с тем, что в твоем AndroidManifest.xml
+    namespace "one.telefon.gateway" 
     
+    compileSdkVersion 34
+    buildToolsVersion "34.0.0"
+
     defaultConfig {
-        applicationId "com.telexample"
+        applicationId "one.telefon.gateway"
         minSdkVersion 21
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
+
+        // Нужно для твоих модулей SIP и Tele
+        missingDimensionStrategy 'store', 'play'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+
+    packagingOptions {
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
     }
 }
 
 dependencies {
-    // Берем локальные файлы из node_modules
+    // Подключаем все библиотеки из папки node_modules напрямую
     implementation fileTree(dir: "../../node_modules/react-native/android", include: ["*.aar"])
+    
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+}
+
+// Заставляем все части проекта использовать одну версию React Native 0.80.0
+configurations.all {
+    resolutionStrategy.force 'com.facebook.react:react-native:0.80.0'
 }
