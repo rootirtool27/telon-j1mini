@@ -12,6 +12,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://jitpack.io" }
+        // Больше никаких локальных maven-путей здесь! 
+        // Это защищает от бесконечного цикла (StackOverflow).
     }
 }
