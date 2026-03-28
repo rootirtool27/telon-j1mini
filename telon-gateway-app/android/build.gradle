@@ -10,14 +10,19 @@ buildscript {
 
 allprojects {
     repositories {
-        mavenCentral()
-        google()
-        
-        // ВОТ ЭТО СПАСЕТ БИЛД:
+        // 1. Сначала ищем в локальных папках node_modules
         maven {
-            // Указываем прямой путь к папке с андроидной частью react-native
-            url("$rootDir/../node_modules/react-native/android")
+            // Прямой путь к папке с React Native Android
+            url "$rootDir/../node_modules/react-native/android"
         }
+        
+        // 2. На всякий случай ищем в корне проекта (если npm решил всё туда положить)
+        maven {
+            url "$rootDir/../../../node_modules/react-native/android"
+        }
+
+        google()
+        mavenCentral()
         
         maven { url 'https://www.jitpack.io' }
     }
