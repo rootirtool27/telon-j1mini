@@ -8,22 +8,11 @@ buildscript {
     }
 }
 
-// ВОТ ЭТОТ БЛОК ЗАМЕНЯЕМ ПОЛНОСТЬЮ
 allprojects {
     repositories {
         google()
         mavenCentral()
-
-        // Прямой путь к папке android внутри node_modules
-        maven {
-            url file("${projectDir}/../../node_modules/react-native/android")
-        }
-
-        // Путь для Android-движка Hermes
-        maven {
-            url file("${projectDir}/../../node_modules/hermes-engine/android")
-        }
-
+        // Оставляем только Джитпак, остальное Грейдл найдет сам в папках
         maven { url "https://jitpack.io" }
     }
 }
