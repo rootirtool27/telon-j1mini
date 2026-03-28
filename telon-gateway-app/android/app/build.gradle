@@ -30,14 +30,10 @@ android {
 }
 
 dependencies {
-    // Указываем путь к node_modules через корень проекта (самый надежный путь)
-    def nodeModules = "${rootProject.projectDir}/../node_modules"
+    // Gradle сам найдет эти AAR-файлы в папках flatDir из внешнего файла
+    implementation name: 'react-native-0.71.0-rc.0', ext: 'aar'
+    implementation name: 'hermes-android', ext: 'aar'
 
-    // Подключаем все архивы библиотек напрямую
-    implementation fileTree(dir: "${nodeModules}/react-native/android", include: ["**/*.aar"])
-    implementation fileTree(dir: "${nodeModules}/hermes-engine/android", include: ["**/*.aar"])
-
-    // Базовые зависимости Android
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
