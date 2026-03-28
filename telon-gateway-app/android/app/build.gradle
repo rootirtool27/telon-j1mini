@@ -10,10 +10,9 @@ android {
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
-        missingDimensionStrategy 'store', 'play'
     }
 
-    // Это "черный ход" для компилятора Java
+    // Указываем, где лежат библиотеки, ОДИН РАЗ
     repositories {
         flatDir {
             dirs "../../node_modules/react-native/android", 
@@ -27,22 +26,14 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
-
-    packagingOptions {
-        pickFirst 'lib/x86/libc++_shared.so'
-        pickFirst 'lib/x86_64/libc++_shared.so'
-        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-        pickFirst 'lib/arm64-v8a/libc++_shared.so'
-    }
 }
 
 dependencies {
-    // 1. Подключаем сами файлы .aar напрямую из папок
-    implementation fileTree(dir: "../../node_modules/react-native/android", include: ["*.aar"])
-    implementation fileTree(dir: "../../node_modules/hermes-engine/android", include: ["*.aar"])
+    // Подключаем библиотеки по именам (как они лежат в папках)
+    implementation name: 'react-native-0.71.0-rc.0', ext: 'aar'
+    implementation name: 'hermes-engine-0.71.0-rc.0', ext: 'aar'
 
-    // 2. Вручную добавляем то, что обычно тянется "автоматом"
-    // Без этих строк будет ошибка "package com.facebook.react does not exist"
+    // Необходимые "мозги" для библиотек
     implementation "com.facebook.infer.annotation:infer-annotation:0.18.0"
     implementation "javax.inject:javax.inject:1"
     implementation "com.facebook.soloader:soloader:0.10.5"
