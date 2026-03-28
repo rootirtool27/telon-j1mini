@@ -1,19 +1,7 @@
-rootProject.name = 'TelonGateway'
-
+rootProject.name = 'telon-gateway-app'
 include ':app'
 
-// Автоматически находим папку node_modules рядом с папкой android
-def nodeModulesDir = new File(rootProject.projectDir, '../node_modules')
-
-include ':react-native-sip2'
-project(':react-native-sip2').projectDir = new File(nodeModulesDir, 'react-native-sip2/android')
-
-include ':react-native-tele'
-project(':react-native-tele').projectDir = new File(nodeModulesDir, 'react-native-tele/android')
-
-// Применяем скрипт из найденной папки
-def nativeModulesScript = new File(nodeModulesDir, '@react-native-community/cli-platform-android/native_modules.gradle')
-if (nativeModulesScript.exists()) {
-    apply from: nativeModulesScript
-    applyNativeModulesSettingsGradle(project)
-}
+// ВСЁ. Больше ничего не инклудим вручную. 
+// Пусть React Native сам разбирается через свой скрипт.
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); 
+applyNativeModulesSettingsGradle(settings)
