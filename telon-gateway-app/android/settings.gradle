@@ -2,11 +2,14 @@ rootProject.name = 'TelonGateway'
 
 include ':app'
 
-// Указываем правильный путь к библиотекам внутри node_modules
+// Исправленные пути: теперь только ОДНА пара точек '../', 
+// так как папка node_modules лежит сразу рядом с папкой android
 include ':react-native-sip2'
-project(':react-native-sip2').projectDir = new File(rootProject.projectDir, '../../node_modules/react-native-sip2/android')
+project(':react-native-sip2').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sip2/android')
 
 include ':react-native-tele'
-project(':react-native-tele').projectDir = new File(rootProject.projectDir, '../../node_modules/react-native-tele/android')
+project(':react-native-tele').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-tele/android')
 
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(project)
+// Исправленный путь для авто-линковки
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); 
+applyNativeModulesSettingsGradle(project)
