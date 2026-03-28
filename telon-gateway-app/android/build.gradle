@@ -4,26 +4,15 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.0.2")
+        // Для React Native 0.80 лучше использовать более свежий Gradle плагин
+        classpath("com.android.tools.build:gradle:7.4.2")
     }
 }
 
 allprojects {
     repositories {
-        // 1. Сначала ищем в локальных папках node_modules
-        maven {
-            // Прямой путь к папке с React Native Android
-            url "$rootDir/../node_modules/react-native/android"
-        }
-        
-        // 2. На всякий случай ищем в корне проекта (если npm решил всё туда положить)
-        maven {
-            url "$rootDir/../../../node_modules/react-native/android"
-        }
-
         google()
         mavenCentral()
-        
         maven { url 'https://www.jitpack.io' }
     }
 }
