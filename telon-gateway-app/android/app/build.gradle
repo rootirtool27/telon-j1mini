@@ -1,7 +1,6 @@
 apply plugin: "com.android.application"
 
 android {
-    // Должно совпадать с тем, что мы писали в Манифесте
     namespace "one.telefon.gateway" 
     compileSdkVersion 34
 
@@ -12,7 +11,6 @@ android {
         versionCode 1
         versionName "1.0"
 
-        // Нужно для работы твоих модулей SIP и Tele
         missingDimensionStrategy 'store', 'play'
     }
 
@@ -32,15 +30,12 @@ android {
 }
 
 dependencies {
-    // ВАЖНО: Мы пишем "+", чтобы Gradle сам взял ту версию, 
-    // которую найдет в node_modules по путям из внешнего файла
-    implementation "com.facebook.react:react-native:+"
-    implementation "com.facebook.react:hermes-android:+"
+    // ПОДКЛЮЧЕНИЕ НАПРЯМУЮ ИЗ ПАПОК (План Б)
+    implementation fileTree(dir: "../../node_modules/react-native/android", include: ["*.aar"])
+    implementation fileTree(dir: "../../node_modules/hermes-engine/android", include: ["*.aar"])
 
+    // Остальные стандартные библиотеки
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "com.facebook.soloader:soloader:0.10.5"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 }
-
-// ВНИМАНИЕ: Если здесь внизу был блок configurations.all { ... }, 
-// мы его УДАЛИЛИ, чтобы не было ошибки StackOverflow.
