@@ -34,30 +34,18 @@ jobs:
         with:
           node-version: 18
 
-      - name: Patch Package JSONs
-        working-directory: ./telon-gsm-sip-gateway
+      - name: Force Local Dependencies
+        working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: |
-          # 1. ЖЕСТКОЕ ЛЕЧЕНИЕ JSON в sip2 через Node.js
-          node -e "
-          const fs = require('fs');
-          const p = './react-native-sip2/package.json';
-          try {
-            let s = fs.readFileSync(p, 'utf8');
-            // Удаляем невидимые символы, лишние запятые и мусор
-            let clean = s.replace(/[\u0000-\u001F\u007F-\u009F]/g, '').replace(/,[ \t\r\n]*([}\]])/g, '\$1');
-            fs.writeFileSync(p, JSON.stringify(JSON.parse(clean), null, 2));
-            console.log('SIP2 JSON fixed and formatted!');
-          } catch (e) {
-            console.log('Error fixing JSON: ' + e.message);
-          }"
+          # 1. Удаляем старые зависимости из package.json, чтобы Yarn не лез в интернет
+          npm remove react-native-tele react-native-sip2 react-native-replace-dialer --package-lock-only || true
+          
+          # 2. Добавляем их как локальные пути (file:../)
+          yarn add file:../react-native-tele file:../react-native-sip2 file:../react-native-replace-dialer --no-lockfile
+          
+          echo "Dependencies switched to LOCAL folders"
 
-          # 2. Подменяем пути в основном проекте
-          cd telon-gateway-app
-          sed -i 's|ssh://git@github.com/telon-org/react-native-tele.git|../react-native-tele|g' package.json
-          sed -i 's|ssh://git@github.com/telon-org/react-native-sip2.git|../react-native-sip2|g' package.json
-          sed -i 's|ssh://git@github.com/telon-org/react-native-replace-dialer.git|../react-native-replace-dialer|g' package.json
-
-      - name: Install Dependencies
+      - name: Install All Dependencies
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: yarn install --no-lockfile
 
