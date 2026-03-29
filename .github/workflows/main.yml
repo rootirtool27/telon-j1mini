@@ -30,6 +30,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install Android Build Tools
+        # Мы ставим именно ту версию, которую просит твой проект (30.0.3)
+        run: |
+          sdkmanager "build-tools;30.0.3" "platforms;android-34" "platform-tools"
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
@@ -45,7 +50,7 @@ jobs:
           pkg.dependencies['react-native-tele'] = 'file:../react-native-tele';
           pkg.dependencies['react-native-sip2'] = 'file:../react-native-sip2';
           pkg.dependencies['react-native-replace-dialer'] = 'file:../react-native-replace-dialer';
-          fs.writeFileSync( 'package.json', JSON.stringify(pkg, null, 2));
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
           "
 
       - name: Install Dependencies
@@ -55,12 +60,9 @@ jobs:
       - name: Manual Settings Patch
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: |
-          # Раз автолинковка спряталась, подключаем зависимости "по-старинке", но надежно
           echo "
           rootProject.name = 'telon-gateway-app'
           include ':app'
-          
-          // Включаем сам react-native как проект из node_modules
           include ':react-native'
           project(':react-native').projectDir = new File(rootProject.projectDir, '../node_modules/react-native/android')
           " > settings.gradle
@@ -70,7 +72,7 @@ jobs:
         env:
           _JAVA_OPTIONS: "-Xmx6g -Xss8m"
         run: |
-          # Прописываем путь к maven репозиторию в build.gradle, чтобы подтянулись AAR-ки
+          # Прописываем путь к maven репозиторию
           sed -i '/allprojects {/a \    repositories {\n        maven { url "$rootDir/../node_modules/react-native/android" }\n        maven { url "$rootDir/../node_modules/jsc-android/dist" }\n    }' build.gradle
           
           rm -rf .gradle build app/build
