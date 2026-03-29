@@ -45,42 +45,34 @@ jobs:
           pkg.dependencies['react-native-tele'] = 'file:../react-native-tele';
           pkg.dependencies['react-native-sip2'] = 'file:../react-native-sip2';
           pkg.dependencies['react-native-replace-dialer'] = 'file:../react-native-replace-dialer';
-          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          fs.writeFileSync( 'package.json', JSON.stringify(pkg, null, 2));
           "
 
       - name: Install Dependencies
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: yarn install --no-lockfile
 
-      - name: Dynamic Settings Patch
-        working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
+      - name: Manual Settings Patch
+        working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: |
-          # 1. Ищем файл и сохраняем его ПУТЬ в переменную
-          # Если файлов несколько, берем первый попавшийся
-          GRADLE_SCRIPT_PATH=$(find node_modules -name "native_modules.gradle" | head -n 1)
-          
-          if [ -z "$GRADLE_SCRIPT_PATH" ]; then
-            echo "КРИТИЧЕСКАЯ ОШИБКА: native_modules.gradle не найден в node_modules!"
-            ls -R node_modules/react-native | grep gradle || true
-            exit 1
-          fi
-          
-          echo "Нашел скрипт тут: $GRADLE_SCRIPT_PATH"
-          
-          # 2. Формируем settings.gradle динамически
-          cd android
+          # Раз автолинковка спряталась, подключаем зависимости "по-старинке", но надежно
           echo "
           rootProject.name = 'telon-gateway-app'
-          apply from: file(\"../$GRADLE_SCRIPT_PATH\"); 
-          applyNativeModulesSettingsGradle(settings)
           include ':app'
+          
+          // Включаем сам react-native как проект из node_modules
+          include ':react-native'
+          project(':react-native').projectDir = new File(rootProject.projectDir, '../node_modules/react-native/android')
           " > settings.gradle
 
-      - name: Build Debug APK
+      - name: Final Build Attempt
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         env:
           _JAVA_OPTIONS: "-Xmx6g -Xss8m"
         run: |
+          # Прописываем путь к maven репозиторию в build.gradle, чтобы подтянулись AAR-ки
+          sed -i '/allprojects {/a \    repositories {\n        maven { url "$rootDir/../node_modules/react-native/android" }\n        maven { url "$rootDir/../node_modules/jsc-android/dist" }\n    }' build.gradle
+          
           rm -rf .gradle build app/build
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon -Pandroid.suppressUnsupportedCompileSdk=34
