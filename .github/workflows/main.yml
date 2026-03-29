@@ -22,7 +22,6 @@ jobs:
           git clone https://github.com/telon-org/react-native-sip2.git
           git clone https://github.com/telon-org/react-native-replace-dialer.git
 
-      # Ставим JDK 17 (она нужна для SDK Manager и современных тулзов)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -42,13 +41,13 @@ jobs:
         with:
           node-version: 18
 
-      - name: Clean SIP2 JSON
+      - name: Emergency Patch for Build
         run: |
+          # 1. Чистим SIP2
           echo '{"name": "react-native-sip2","version": "1.0.0","main": "index.js"}' > ./telon-gsm-sip-gateway/react-native-sip2/package.json
-
-      - name: Safe Patch main package.json
-        working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
-        run: |
+          
+          # 2. Правим основной package.json через Node
+          cd telon-gsm-sip-gateway/telon-gateway-app
           node -e "
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
@@ -58,16 +57,21 @@ jobs:
           fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
           "
 
-      - name: Install All Dependencies
+      - name: Install Dependencies
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
-        run: yarn install --no-lockfile
+        run: |
+          yarn install --network-timeout 1000000
+          # Проверка: скачался ли react-native?
+          ls node_modules/react-native/package.json || echo "REACT NATIVE NOT FOUND!"
 
       - name: Make Gradlew Executable
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: chmod +x gradlew
 
-      # Собираем, заставляя Gradle использовать совместимость (через флаги)
       - name: Build Debug APK
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
-        run: ./gradlew assembleDebug --no-daemon
-        
+        # Добавляем переменные окружения для памяти и игнорируем ошибки SDK
+        run: |
+          export _JAVA_OPTIONS="-Xmx4g -Xss4m"
+          ./gradlew assembleDebug --no-daemon -Pandroid.suppressUnsupportedCompileSdk=34
+          
