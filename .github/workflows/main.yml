@@ -34,9 +34,18 @@ jobs:
         with:
           node-version: 18
 
+      # ЭТОТ ШАГ ИСПРАВЛЯЕТ ОШИБКУ 128 (SSH Permission Denied)
+      - name: Patch Package JSON for Local Paths
+        working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
+        run: |
+          sed -i 's|ssh://git@github.com/telon-org/react-native-tele.git|../react-native-tele|g' package.json
+          sed -i 's|ssh://git@github.com/telon-org/react-native-sip2.git|../react-native-sip2|g' package.json
+          sed -i 's|ssh://git@github.com/telon-org/react-native-replace-dialer.git|../react-native-replace-dialer|g' package.json
+          echo "Patched package.json to use local folders instead of SSH"
+
       - name: Install Dependencies
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
-        run: yarn install
+        run: yarn install --no-lockfile
 
       - name: Make Gradlew Executable
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
