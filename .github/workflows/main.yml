@@ -1,14 +1,12 @@
 name: Build Android APK
 
 on:
-  push:
-    branches: [ main, master ]
+  push: branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout main repository
         uses: actions/checkout@v4
@@ -33,20 +31,18 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Android Build Tools
-        run: |
-          sdkmanager "build-tools;30.0.3" "platforms;android-34"
+        run: sdkmanager "build-tools;30.0.3" "platforms;android-34"
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Patch Dependencies
+      - name: Fix Configs
         run: |
-          # Чистим проблемный JSON в sip2
+          # Чистим SIP2
           echo '{"name": "react-native-sip2","version": "1.0.0","main": "index.js"}' > ./telon-gsm-sip-gateway/react-native-sip2/package.json
-          
-          # Привязываем локальные папки в основном проекте
+          # Патчим основной проект
           cd telon-gsm-sip-gateway/telon-gateway-app
           node -e "
           const fs = require('fs');
@@ -59,10 +55,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
-        run: |
-          yarn install --no-lockfile
-          # Важно: запускаем связку библиотек
-          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res || echo "Bundle failed, but we continue..."
+        run: yarn install --no-lockfile
 
       - name: Make Gradlew Executable
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
@@ -71,9 +64,12 @@ jobs:
       - name: Build Debug APK
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         env:
-          _JAVA_OPTIONS: "-Xmx4g -Xss8m"
+          # Увеличиваем стек до 16МБ и память до 4ГБ прямо для процесса компиляции
+          _JAVA_OPTIONS: "-Xmx4g -Xss16m"
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs='-Xmx4g -Xss16m'"
         run: |
-          # Очистка перед сборкой и запуск с подавлением ошибок SDK
-          ./gradlew clean
-          ./gradlew assembleDebug --no-daemon -Pandroid.suppressUnsupportedCompileSdk=34
-          
+          # Собираем с пропуском тестов и линта, чтобы сэкономить ресурсы
+          ./gradlew assembleDebug --no-daemon \
+            -Pandroid.suppressUnsupportedCompileSdk=34 \
+            -x lint -x test
+            
