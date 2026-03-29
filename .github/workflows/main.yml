@@ -1,7 +1,8 @@
 name: Build Android APK
 
 on:
-  push: branches: [ main, master ]
+  push:
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -38,15 +39,19 @@ jobs:
         with:
           node-version: 18
 
-      - name: Fix Configs
+      - name: Hard Reset Configs
         run: |
-          # Чистим SIP2
+          # Стерилизуем sip2 еще раз
           echo '{"name": "react-native-sip2","version": "1.0.0","main": "index.js"}' > ./telon-gsm-sip-gateway/react-native-sip2/package.json
-          # Патчим основной проект
+          
           cd telon-gsm-sip-gateway/telon-gateway-app
+          # Полностью пересоздаем зависимости, чтобы исключить старые хвосты
           node -e "
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          delete pkg.dependencies['react-native-tele'];
+          delete pkg.dependencies['react-native-sip2'];
+          delete pkg.dependencies['react-native-replace-dialer'];
           pkg.dependencies['react-native-tele'] = 'file:../react-native-tele';
           pkg.dependencies['react-native-sip2'] = 'file:../react-native-sip2';
           pkg.dependencies['react-native-replace-dialer'] = 'file:../react-native-replace-dialer';
@@ -61,15 +66,17 @@ jobs:
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: chmod +x gradlew
 
-      - name: Build Debug APK
+      - name: Build Debug APK (Debug Mode)
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         env:
-          # Увеличиваем стек до 16МБ и память до 4ГБ прямо для процесса компиляции
-          _JAVA_OPTIONS: "-Xmx4g -Xss16m"
-          GRADLE_OPTS: "-Dorg.gradle.jvmargs='-Xmx4g -Xss16m'"
+          _JAVA_OPTIONS: "-Xmx4g -Xss20m"
         run: |
-          # Собираем с пропуском тестов и линта, чтобы сэкономить ресурсы
-          ./gradlew assembleDebug --no-daemon \
+          # --no-daemon и --stacktrace помогут увидеть корень зла, если снова упадет
+          # --max-workers=1 запретит Gradle распараллеливать задачи (иногда это лечит StackOverflow)
+          ./gradlew assembleDebug \
+            --no-daemon \
+            --stacktrace \
+            --max-workers=1 \
             -Pandroid.suppressUnsupportedCompileSdk=34 \
-            -x lint -x test
+            -x lint
             
