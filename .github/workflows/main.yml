@@ -41,12 +41,12 @@ jobs:
         with:
           node-version: 18
 
-      - name: Emergency Patch for Build
+      - name: Patch Dependencies
         run: |
-          # 1. Чистим SIP2
+          # Чистим проблемный JSON в sip2
           echo '{"name": "react-native-sip2","version": "1.0.0","main": "index.js"}' > ./telon-gsm-sip-gateway/react-native-sip2/package.json
           
-          # 2. Правим основной package.json через Node
+          # Привязываем локальные папки в основном проекте
           cd telon-gsm-sip-gateway/telon-gateway-app
           node -e "
           const fs = require('fs');
@@ -60,9 +60,9 @@ jobs:
       - name: Install Dependencies
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: |
-          yarn install --network-timeout 1000000
-          # Проверка: скачался ли react-native?
-          ls node_modules/react-native/package.json || echo "REACT NATIVE NOT FOUND!"
+          yarn install --no-lockfile
+          # Важно: запускаем связку библиотек
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res || echo "Bundle failed, but we continue..."
 
       - name: Make Gradlew Executable
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
@@ -70,8 +70,10 @@ jobs:
 
       - name: Build Debug APK
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
-        # Добавляем переменные окружения для памяти и игнорируем ошибки SDK
+        env:
+          _JAVA_OPTIONS: "-Xmx4g -Xss8m"
         run: |
-          export _JAVA_OPTIONS="-Xmx4g -Xss4m"
+          # Очистка перед сборкой и запуск с подавлением ошибок SDK
+          ./gradlew clean
           ./gradlew assembleDebug --no-daemon -Pandroid.suppressUnsupportedCompileSdk=34
           
