@@ -34,16 +34,28 @@ jobs:
         with:
           node-version: 18
 
+      - name: Nuke and Rebuild Broken JSON
+        run: |
+          # Создаем чистый package.json для sip2 вручную, чтобы точно не было ошибок
+          cat <<EOF > ./telon-gsm-sip-gateway/react-native-sip2/package.json
+          {
+            "name": "react-native-sip2",
+            "version": "1.0.0",
+            "main": "index.js",
+            "dependencies": {}
+          }
+          EOF
+          echo "Created fresh package.json for react-native-sip2"
+
       - name: Force Local Dependencies
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: |
-          # 1. Удаляем старые зависимости из package.json, чтобы Yarn не лез в интернет
-          npm remove react-native-tele react-native-sip2 react-native-replace-dialer --package-lock-only || true
+          # Убираем всё лишнее и привязываем локальные папки
+          sed -i '/react-native-tele/d' package.json
+          sed -i '/react-native-sip2/d' package.json
+          sed -i '/react-native-replace-dialer/d' package.json
           
-          # 2. Добавляем их как локальные пути (file:../)
           yarn add file:../react-native-tele file:../react-native-sip2 file:../react-native-replace-dialer --no-lockfile
-          
-          echo "Dependencies switched to LOCAL folders"
 
       - name: Install All Dependencies
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
