@@ -12,27 +12,27 @@ jobs:
     steps:
       # 1. Клонируем основной репозиторий в подпапку
       - name: Checkout main repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: telon-gsm-sip-gateway
 
-      # 2. Клонируем зависимости РЯДОМ (как в инструкции)
+      # 2. Клонируем зависимости РЯДОМ (как в Офф-Гайде)
       - name: Clone Required Libraries
         run: |
           git clone https://github.com/telon-org/react-native-tele.git
           git clone https://github.com/telon-org/react-native-sip2.git
           git clone https://github.com/telon-org/react-native-replace-dialer.git
-        # Теперь структура: ./react-native-tele и ./telon-gsm-sip-gateway лежат в одном корне
+        # Теперь папки лежат на одном уровне в корне: /home/runner/work/...
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'zulu'
           cache: gradle
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
@@ -46,15 +46,16 @@ jobs:
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: chmod +x gradlew
 
-      # 5. Сама сборка
+      # 5. Сама сборка (используем --no-daemon для стабильности в CI)
       - name: Build Debug APK
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: ./gradlew assembleDebug --no-daemon
 
-      # 6. Сохраняем результат
+      # 6. Сохраняем результат (Версия v4, как требует GitHub 2026)
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: telon-gsm-sip-gateway/telon-gateway-app/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
           
