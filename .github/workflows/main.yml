@@ -26,7 +26,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
-          cache: gradle
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -39,19 +38,13 @@ jobs:
         with:
           node-version: 18
 
-      - name: Hard Reset Configs
+      - name: Patch Package JSON
         run: |
-          # Стерилизуем sip2 еще раз
           echo '{"name": "react-native-sip2","version": "1.0.0","main": "index.js"}' > ./telon-gsm-sip-gateway/react-native-sip2/package.json
-          
           cd telon-gsm-sip-gateway/telon-gateway-app
-          # Полностью пересоздаем зависимости, чтобы исключить старые хвосты
           node -e "
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          delete pkg.dependencies['react-native-tele'];
-          delete pkg.dependencies['react-native-sip2'];
-          delete pkg.dependencies['react-native-replace-dialer'];
           pkg.dependencies['react-native-tele'] = 'file:../react-native-tele';
           pkg.dependencies['react-native-sip2'] = 'file:../react-native-sip2';
           pkg.dependencies['react-native-replace-dialer'] = 'file:../react-native-replace-dialer';
@@ -62,21 +55,20 @@ jobs:
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: yarn install --no-lockfile
 
-      - name: Make Gradlew Executable
+      - name: Hack Gradle to break the loop
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
-        run: chmod +x gradlew
+        run: |
+          # Временно отключаем автоматический инклюд модулей в settings.gradle, 
+          # если он там есть, чтобы проверить теорию петли.
+          sed -i 's|apply from:.*native_modules.gradle|// apply from: native_modules.gradle|g' settings.gradle || true
 
-      - name: Build Debug APK (Debug Mode)
+      - name: Build Debug APK
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         env:
-          _JAVA_OPTIONS: "-Xmx4g -Xss20m"
+          _JAVA_OPTIONS: "-Xmx6g -Xss64m"
         run: |
-          # --no-daemon и --stacktrace помогут увидеть корень зла, если снова упадет
-          # --max-workers=1 запретит Gradle распараллеливать задачи (иногда это лечит StackOverflow)
-          ./gradlew assembleDebug \
-            --no-daemon \
-            --stacktrace \
-            --max-workers=1 \
-            -Pandroid.suppressUnsupportedCompileSdk=34 \
-            -x lint
-            
+          rm -rf .gradle
+          chmod +x gradlew
+          # Собираем БЕЗ параллелизма и БЕЗ демона
+          ./gradlew assembleDebug --no-daemon --max-workers=1 -Pandroid.suppressUnsupportedCompileSdk=34
+          
