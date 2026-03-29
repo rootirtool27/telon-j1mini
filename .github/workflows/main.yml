@@ -38,12 +38,9 @@ jobs:
         with:
           node-version: 18
 
-      - name: Fix Configs
+      - name: Patch Package JSON
         run: |
-          # 1. Лечим SIP2
           echo '{"name": "react-native-sip2","version": "1.0.0","main": "index.js"}' > ./telon-gsm-sip-gateway/react-native-sip2/package.json
-          
-          # 2. Правим package.json
           cd telon-gsm-sip-gateway/telon-gateway-app
           node -e "
           const fs = require('fs');
@@ -58,13 +55,21 @@ jobs:
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: yarn install --no-lockfile
 
-      - name: Force Android Links
+      - name: Nuclear Patch for Android
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: |
-          # Пытаемся починить пути в build.gradle, если они смотрят не туда
-          sed -i 's|node_modules/react-native/package.json|../../node_modules/react-native/package.json|g' build.gradle || true
-          # Гарантируем, что Gradle видит локальный репозиторий React Native
-          sed -i '/repositories {/a \        maven { url "$rootDir/../node_modules/react-native/android" }' build.gradle || true
+          # 1. Принудительно вставляем React Native в проект через settings.gradle
+          echo "include ':react-native'" >> settings.gradle
+          echo "project(':react-native').projectDir = new File(rootProject.projectDir, '../node_modules/react-native/android')" >> settings.gradle
+          
+          # 2. Прописываем мавен-путь в основной build.gradle
+          sed -i '/allprojects {/a \    repositories {\n        maven { url "$rootDir/../node_modules/react-native/android" }\n    }' build.gradle
+          
+          # 3. Добавляем прямую зависимость в app/build.gradle
+          sed -i '/dependencies {/a \    implementation project(":react-native")' app/build.gradle
+          
+          # 4. Фикс памяти для Gradle
+          echo "org.gradle.jvmargs=-Xmx4g -Xss16m" >> gradle.properties
 
       - name: Build Debug APK
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
