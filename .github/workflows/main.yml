@@ -52,18 +52,26 @@ jobs:
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: yarn install --no-lockfile
 
-      - name: Debug File Structure & Fix Settings
+      - name: Dynamic Settings Patch
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: |
-          # Ищем, где на самом деле лежит этот вредный скрипт
-          find node_modules -name "native_modules.gradle"
+          # 1. Ищем файл и сохраняем его ПУТЬ в переменную
+          # Если файлов несколько, берем первый попавшийся
+          GRADLE_SCRIPT_PATH=$(find node_modules -name "native_modules.gradle" | head -n 1)
           
-          # Записываем правильный путь в settings.gradle (используя более гибкий поиск через CLI)
+          if [ -z "$GRADLE_SCRIPT_PATH" ]; then
+            echo "КРИТИЧЕСКАЯ ОШИБКА: native_modules.gradle не найден в node_modules!"
+            ls -R node_modules/react-native | grep gradle || true
+            exit 1
+          fi
+          
+          echo "Нашел скрипт тут: $GRADLE_SCRIPT_PATH"
+          
+          # 2. Формируем settings.gradle динамически
           cd android
           echo "
           rootProject.name = 'telon-gateway-app'
-          // Пытаемся подцепить скрипт через стандартный путь React Native
-          apply from: file(\"../node_modules/react-native/scripts/native_modules.gradle\"); 
+          apply from: file(\"../$GRADLE_SCRIPT_PATH\"); 
           applyNativeModulesSettingsGradle(settings)
           include ':app'
           " > settings.gradle
