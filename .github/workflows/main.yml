@@ -1,46 +1,41 @@
 name: Build Android APK
 
-on:
-  push:
-    branches: [ main, master ]
-  workflow_dispatch:
+on: push
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           path: telon-gsm-sip-gateway
 
-      - name: Clone Required Libraries
+      - name: Clone Libs
         run: |
           cd telon-gsm-sip-gateway
           git clone https://github.com/telon-org/react-native-tele.git
           git clone https://github.com/telon-org/react-native-sip2.git
           git clone https://github.com/telon-org/react-native-replace-dialer.git
 
-      - name: Set up JDK 17
+      - name: Java & SDK
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: Setup Android SDK
+      - name: Android Setup
         uses: android-actions/setup-android@v3
 
-      - name: Install Android Build Tools
-        # Мы ставим именно ту версию, которую просит твой проект (30.0.3)
-        run: |
-          sdkmanager "build-tools;30.0.3" "platforms;android-34" "platform-tools"
+      - name: Install Tools
+        run: sdkmanager "build-tools;30.0.3" "platforms;android-34"
 
-      - name: Install Node.js
+      - name: Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Patch Package JSON
+      - name: Patch JS
         run: |
           echo '{"name": "react-native-sip2","version": "1.0.0","main": "index.js"}' > ./telon-gsm-sip-gateway/react-native-sip2/package.json
           cd telon-gsm-sip-gateway/telon-gateway-app
@@ -53,29 +48,26 @@ jobs:
           fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
           "
 
-      - name: Install Dependencies
+      - name: Install deps
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: yarn install --no-lockfile
 
-      - name: Manual Settings Patch
+      - name: Force Fix Android
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: |
-          echo "
-          rootProject.name = 'telon-gateway-app'
-          include ':app'
-          include ':react-native'
-          project(':react-native').projectDir = new File(rootProject.projectDir, '../node_modules/react-native/android')
-          " > settings.gradle
+          # 1. Стираем всё в settings.gradle и пишем чистый конфиг без автолинковки
+          echo "rootProject.name = 'telon-gateway-app'" > settings.gradle
+          echo "include ':app'" >> settings.gradle
+          
+          # 2. Добавляем ПРЯМОЙ путь к Maven в app/build.gradle
+          # Мы заставляем проект брать классы из AAR файлов напрямую
+          sed -i '/dependencies {/a \    implementation fileTree(dir: "../node_modules/react-native/android", include: ["*.aar"])' app/build.gradle
+          sed -i '/dependencies {/a \    implementation "com.facebook.react:react-native:+"' app/build.gradle
 
-      - name: Final Build Attempt
+      - name: Build
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         env:
-          _JAVA_OPTIONS: "-Xmx6g -Xss8m"
+          _JAVA_OPTIONS: "-Xmx6g -Xss128m" # Удваиваем стек до максимума
         run: |
-          # Прописываем путь к maven репозиторию
-          sed -i '/allprojects {/a \    repositories {\n        maven { url "$rootDir/../node_modules/react-native/android" }\n        maven { url "$rootDir/../node_modules/jsc-android/dist" }\n    }' build.gradle
-          
-          rm -rf .gradle build app/build
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon -Pandroid.suppressUnsupportedCompileSdk=34
-          
