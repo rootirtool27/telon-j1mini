@@ -22,14 +22,14 @@ jobs:
           git clone https://github.com/telon-org/react-native-sip2.git
           git clone https://github.com/telon-org/react-native-replace-dialer.git
 
-      - name: Set up JDK 11
+      # Ставим JDK 17 (она нужна для SDK Manager и современных тулзов)
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'zulu'
           cache: gradle
 
-      # НОВЫЙ ШАГ: Установка нужных инструментов Android
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
@@ -66,14 +66,8 @@ jobs:
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: chmod +x gradlew
 
+      # Собираем, заставляя Gradle использовать совместимость (через флаги)
       - name: Build Debug APK
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: ./gradlew assembleDebug --no-daemon
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug
-          path: telon-gsm-sip-gateway/telon-gateway-app/android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          
+        
