@@ -38,9 +38,12 @@ jobs:
         with:
           node-version: 18
 
-      - name: Patch Package JSON
+      - name: Fix Package JSON & SIP2
         run: |
+          # Исправляем битый JSON в sip2
           echo '{"name": "react-native-sip2","version": "1.0.0","main": "index.js"}' > ./telon-gsm-sip-gateway/react-native-sip2/package.json
+          
+          # Настраиваем локальные ссылки в основном приложении
           cd telon-gsm-sip-gateway/telon-gateway-app
           node -e "
           const fs = require('fs');
@@ -55,28 +58,26 @@ jobs:
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: yarn install --no-lockfile
 
-      - name: Nuclear Patch for Android
+      - name: Repair Settings Gradle
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: |
-          # 1. Принудительно вставляем React Native в проект через settings.gradle
-          echo "include ':react-native'" >> settings.gradle
-          echo "project(':react-native').projectDir = new File(rootProject.projectDir, '../node_modules/react-native/android')" >> settings.gradle
+          # Перезаписываем settings.gradle, чтобы он четко видел путь к CLI
+          echo "
+          rootProject.name = 'telon-gateway-app'
+          apply from: file(\"../node_modules/@react-native-community/cli-platform-android/native_modules.gradle\"); 
+          applyNativeModulesSettingsGradle(settings)
+          include ':app'
+          " > settings.gradle
           
-          # 2. Прописываем мавен-путь в основной build.gradle
-          sed -i '/allprojects {/a \    repositories {\n        maven { url "$rootDir/../node_modules/react-native/android" }\n    }' build.gradle
-          
-          # 3. Добавляем прямую зависимость в app/build.gradle
-          sed -i '/dependencies {/a \    implementation project(":react-native")' app/build.gradle
-          
-          # 4. Фикс памяти для Gradle
-          echo "org.gradle.jvmargs=-Xmx4g -Xss16m" >> gradle.properties
+          # Добавляем Maven-путь к React Native в build.gradle
+          sed -i '/allprojects {/a \    repositories {\n        maven { url \"$rootDir/../node_modules/react-native/android\" }\n        maven { url \"$rootDir/../node_modules/jsc-android/dist\" }\n    }' build.gradle
 
       - name: Build Debug APK
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         env:
-          _JAVA_OPTIONS: "-Xmx6g -Xss64m"
+          # Обычный стек, так как мы вылечили рекурсию
+          _JAVA_OPTIONS: "-Xmx6g -Xss8m"
         run: |
           rm -rf .gradle build app/build
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon -Pandroid.suppressUnsupportedCompileSdk=34
-          
