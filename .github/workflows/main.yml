@@ -38,9 +38,12 @@ jobs:
         with:
           node-version: 18
 
-      - name: Patch Package JSON
+      - name: Fix Configs
         run: |
+          # 1. Лечим SIP2
           echo '{"name": "react-native-sip2","version": "1.0.0","main": "index.js"}' > ./telon-gsm-sip-gateway/react-native-sip2/package.json
+          
+          # 2. Правим package.json
           cd telon-gsm-sip-gateway/telon-gateway-app
           node -e "
           const fs = require('fs');
@@ -55,20 +58,20 @@ jobs:
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: yarn install --no-lockfile
 
-      - name: Hack Gradle to break the loop
+      - name: Force Android Links
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: |
-          # Временно отключаем автоматический инклюд модулей в settings.gradle, 
-          # если он там есть, чтобы проверить теорию петли.
-          sed -i 's|apply from:.*native_modules.gradle|// apply from: native_modules.gradle|g' settings.gradle || true
+          # Пытаемся починить пути в build.gradle, если они смотрят не туда
+          sed -i 's|node_modules/react-native/package.json|../../node_modules/react-native/package.json|g' build.gradle || true
+          # Гарантируем, что Gradle видит локальный репозиторий React Native
+          sed -i '/repositories {/a \        maven { url "$rootDir/../node_modules/react-native/android" }' build.gradle || true
 
       - name: Build Debug APK
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         env:
           _JAVA_OPTIONS: "-Xmx6g -Xss64m"
         run: |
-          rm -rf .gradle
+          rm -rf .gradle build app/build
           chmod +x gradlew
-          # Собираем БЕЗ параллелизма и БЕЗ демона
-          ./gradlew assembleDebug --no-daemon --max-workers=1 -Pandroid.suppressUnsupportedCompileSdk=34
+          ./gradlew assembleDebug --no-daemon -Pandroid.suppressUnsupportedCompileSdk=34
           
