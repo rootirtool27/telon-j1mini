@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: Patch JS
+      - name: Fix SIP2 & JSON
         run: |
           echo '{"name": "react-native-sip2","version": "1.0.0","main": "index.js"}' > ./telon-gsm-sip-gateway/react-native-sip2/package.json
           cd telon-gsm-sip-gateway/telon-gateway-app
@@ -52,22 +52,37 @@ jobs:
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app
         run: yarn install --no-lockfile
 
-      - name: Force Fix Android
+      - name: Surgical Android Patch
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         run: |
-          # 1. Стираем всё в settings.gradle и пишем чистый конфиг без автолинковки
+          # 1. Чистим settings.gradle (убираем всё, что вызывает циклы)
           echo "rootProject.name = 'telon-gateway-app'" > settings.gradle
           echo "include ':app'" >> settings.gradle
           
-          # 2. Добавляем ПРЯМОЙ путь к Maven в app/build.gradle
-          # Мы заставляем проект брать классы из AAR файлов напрямую
-          sed -i '/dependencies {/a \    implementation fileTree(dir: "../node_modules/react-native/android", include: ["*.aar"])' app/build.gradle
-          sed -i '/dependencies {/a \    implementation "com.facebook.react:react-native:+"' app/build.gradle
+          # 2. Правим build.gradle (верхний уровень) - ЖЕСТКО задаем репозитории
+          echo "
+          allprojects {
+              repositories {
+                  mavenLocal()
+                  maven { url \"\$rootDir/../node_modules/react-native/android\" }
+                  maven { url \"\$rootDir/../node_modules/jsc-android/dist\" }
+                  google()
+                  mavenCentral()
+              }
+          }
+          " > build.gradle
 
-      - name: Build
+          # 3. Правим app/build.gradle - убираем динамику
+          # Удаляем строку с implementation "com.facebook.react:react-native:+" если она там есть
+          sed -i '/com.facebook.react:react-native/d' app/build.gradle
+          # Вставляем ПРЯМУЮ зависимость на версию из node_modules
+          sed -i '/dependencies {/a \    implementation "com.facebook.react:react-native:0.71.0-rc.0"' app/build.gradle
+
+      - name: Final Build
         working-directory: ./telon-gsm-sip-gateway/telon-gateway-app/android
         env:
-          _JAVA_OPTIONS: "-Xmx6g -Xss128m" # Удваиваем стек до максимума
+          _JAVA_OPTIONS: "-Xmx6g -Xss2m" # Уменьшаем стек! Если была рекурсия, он упадет СРАЗУ, и мы увидим ГДЕ.
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon -Pandroid.suppressUnsupportedCompileSdk=34
+          
